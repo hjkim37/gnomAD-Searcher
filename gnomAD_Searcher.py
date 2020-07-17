@@ -17,7 +17,7 @@ class gnomAD_Searcher:
        snp은 'rsID'를 컬럼이름 으로 갖고 형식은 'rs123' 또는 'chr15:g.75077367C>A' 형식이 가능하다.
        'rs123'형식으로 찾았을때 못찾는 경우가 있으니 후자쪽을 추천한다."""
 
-    def __init__(snplist):
+    def __init__(self, snplist):
         snplist = os.path.abspath(snplist)
         df = pd.read_csv(snplist, sep = '\t')
         rsid = df.rsID.to_list()
@@ -29,14 +29,18 @@ class gnomAD_Searcher:
                 print(snp, "No RESULT")
                 continue
             decoded = r.json()
-            result.setdefault("rsid", []).append(decoded['gnomad_genome']['rsid'])
-            result.setdefault("REF", []).append(decoded['gnomad_genome']['ref'])
-            result.setdefault("ALT", []).append(decoded['gnomad_genome']['alt'])
-            result.setdefault("African", []).append(decoded['gnomad_genome']['af']['af_afr'])
-            result.setdefault("Latino", []).append(decoded['gnomad_genome']['af']['af_amr'])
-            result.setdefault("East_Asian", []).append(decoded['gnomad_genome']['af']['af_eas'])
-            result.setdefault("Finnish", []).append(decoded['gnomad_genome']['af']['af_fin'])
-            result.setdefault("European", []).append(decoded['gnomad_genome']['af']['af_nfe'])
+            try:
+                result.setdefault("rsid", []).append(decoded['gnomad_genome']['rsid'])
+                result.setdefault("REF", []).append(decoded['gnomad_genome']['ref'])
+                result.setdefault("ALT", []).append(decoded['gnomad_genome']['alt'])
+                result.setdefault("African", []).append(decoded['gnomad_genome']['af']['af_afr'])
+                result.setdefault("Latino", []).append(decoded['gnomad_genome']['af']['af_amr'])
+                result.setdefault("East_Asian", []).append(decoded['gnomad_genome']['af']['af_eas'])
+                result.setdefault("Finnish", []).append(decoded['gnomad_genome']['af']['af_fin'])
+                result.setdefault("European", []).append(decoded['gnomad_genome']['af']['af_nfe'])
+            except:
+                print(snp, "Key error")
+                continue
 
         result_df = pd.DataFrame(result)
         directory = os.path.dirname(snplist)
